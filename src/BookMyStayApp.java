@@ -89,10 +89,10 @@ public class BookMyStayApp {
 
     public static void main(String[] args) {
 
-        // UC7
+        // UC8
         System.out.println("======================================");
         System.out.println(" Welcome to Book My Stay Application ");
-        System.out.println(" Hotel Booking System v7.1 ");
+        System.out.println(" Hotel Booking System v8.1 ");
         System.out.println("======================================");
 
         RoomInventory inventory = new RoomInventory();
@@ -107,6 +107,7 @@ public class BookMyStayApp {
         allocatedRooms.put("Suite Room", new HashSet<>());
 
         HashMap<String, List<AddOnService>> serviceMap = new HashMap<>();
+        List<Reservation> bookingHistory = new ArrayList<>();
 
         int roomCounter = 1;
 
@@ -133,9 +134,16 @@ public class BookMyStayApp {
                 }
 
                 System.out.println("Add-ons for " + r.reservationId + ": " + total);
+
+                bookingHistory.add(r);
             } else {
                 System.out.println(r.guestName + " booking failed for " + r.roomType);
             }
+        }
+
+        System.out.println("----- Booking History -----");
+        for (Reservation r : bookingHistory) {
+            System.out.println(r.reservationId + " | " + r.guestName + " | " + r.roomType);
         }
 
         System.out.println("Application terminated.");
