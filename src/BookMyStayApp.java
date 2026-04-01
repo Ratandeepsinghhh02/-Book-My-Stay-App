@@ -1,4 +1,4 @@
-import java.util.HashMap;
+import java.util.*;
 
 abstract class Room {
     String type;
@@ -59,14 +59,24 @@ class RoomInventory {
     }
 }
 
+class Reservation {
+    String guestName;
+    String roomType;
+
+    Reservation(String guestName, String roomType) {
+        this.guestName = guestName;
+        this.roomType = roomType;
+    }
+}
+
 public class BookMyStayApp {
 
     public static void main(String[] args) {
 
-        // UC4
+        // UC5
         System.out.println("======================================");
         System.out.println(" Welcome to Book My Stay Application ");
-        System.out.println(" Hotel Booking System v4.1 ");
+        System.out.println(" Hotel Booking System v5.1 ");
         System.out.println("======================================");
 
         Room single = new SingleRoom();
@@ -90,6 +100,17 @@ public class BookMyStayApp {
         if (inventory.getAvailability("Suite Room") > 0) {
             suite.display();
             System.out.println("Available: " + inventory.getAvailability("Suite Room"));
+        }
+
+        Queue<Reservation> bookingQueue = new LinkedList<>();
+
+        bookingQueue.add(new Reservation("Alice", "Single Room"));
+        bookingQueue.add(new Reservation("Bob", "Double Room"));
+        bookingQueue.add(new Reservation("Charlie", "Suite Room"));
+
+        System.out.println("----- Booking Queue -----");
+        for (Reservation r : bookingQueue) {
+            System.out.println(r.guestName + " requested " + r.roomType);
         }
 
         System.out.println("Application terminated.");
