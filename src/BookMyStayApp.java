@@ -66,10 +66,22 @@ class RoomInventory {
 class Reservation {
     String guestName;
     String roomType;
+    String reservationId;
 
-    Reservation(String guestName, String roomType) {
+    Reservation(String guestName, String roomType, String reservationId) {
         this.guestName = guestName;
         this.roomType = roomType;
+        this.reservationId = reservationId;
+    }
+}
+
+class AddOnService {
+    String name;
+    double cost;
+
+    AddOnService(String name, double cost) {
+        this.name = name;
+        this.cost = cost;
     }
 }
 
@@ -77,27 +89,26 @@ public class BookMyStayApp {
 
     public static void main(String[] args) {
 
-        // UC6
+        // UC7
         System.out.println("======================================");
         System.out.println(" Welcome to Book My Stay Application ");
-        System.out.println(" Hotel Booking System v6.1 ");
+        System.out.println(" Hotel Booking System v7.1 ");
         System.out.println("======================================");
 
         RoomInventory inventory = new RoomInventory();
 
         Queue<Reservation> bookingQueue = new LinkedList<>();
-        bookingQueue.add(new Reservation("Alice", "Single Room"));
-        bookingQueue.add(new Reservation("Bob", "Double Room"));
-        bookingQueue.add(new Reservation("Charlie", "Suite Room"));
+        bookingQueue.add(new Reservation("Alice", "Single Room", "R1"));
+        bookingQueue.add(new Reservation("Bob", "Double Room", "R2"));
 
         HashMap<String, Set<String>> allocatedRooms = new HashMap<>();
         allocatedRooms.put("Single Room", new HashSet<>());
         allocatedRooms.put("Double Room", new HashSet<>());
         allocatedRooms.put("Suite Room", new HashSet<>());
 
-        int roomCounter = 1;
+        HashMap<String, List<AddOnService>> serviceMap = new HashMap<>();
 
-        System.out.println("----- Processing Bookings -----");
+        int roomCounter = 1;
 
         while (!bookingQueue.isEmpty()) {
             Reservation r = bookingQueue.poll();
@@ -109,6 +120,19 @@ public class BookMyStayApp {
                 inventory.reduceAvailability(r.roomType);
 
                 System.out.println(r.guestName + " booked " + r.roomType + " | Room ID: " + roomId);
+
+                List<AddOnService> services = new ArrayList<>();
+                services.add(new AddOnService("Breakfast", 500));
+                services.add(new AddOnService("WiFi", 200));
+
+                serviceMap.put(r.reservationId, services);
+
+                double total = 0;
+                for (AddOnService s : services) {
+                    total += s.cost;
+                }
+
+                System.out.println("Add-ons for " + r.reservationId + ": " + total);
             } else {
                 System.out.println(r.guestName + " booking failed for " + r.roomType);
             }
