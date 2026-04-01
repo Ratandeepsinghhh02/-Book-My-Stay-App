@@ -63,10 +63,10 @@ public class BookMyStayApp {
 
     public static void main(String[] args) {
 
-        // UC3
+        // UC4
         System.out.println("======================================");
         System.out.println(" Welcome to Book My Stay Application ");
-        System.out.println(" Hotel Booking System v3.1 ");
+        System.out.println(" Hotel Booking System v4.1 ");
         System.out.println("======================================");
 
         Room single = new SingleRoom();
@@ -75,14 +75,22 @@ public class BookMyStayApp {
 
         RoomInventory inventory = new RoomInventory();
 
-        single.display();
-        System.out.println("Available: " + inventory.getAvailability("Single Room"));
+        System.out.println("----- Available Rooms -----");
 
-        dbl.display();
-        System.out.println("Available: " + inventory.getAvailability("Double Room"));
+        if (inventory.getAvailability("Single Room") > 0) {
+            single.display();
+            System.out.println("Available: " + inventory.getAvailability("Single Room"));
+        }
 
-        suite.display();
-        System.out.println("Available: " + inventory.getAvailability("Suite Room"));
+        if (inventory.getAvailability("Double Room") > 0) {
+            dbl.display();
+            System.out.println("Available: " + inventory.getAvailability("Double Room"));
+        }
+
+        if (inventory.getAvailability("Suite Room") > 0) {
+            suite.display();
+            System.out.println("Available: " + inventory.getAvailability("Suite Room"));
+        }
 
         System.out.println("Application terminated.");
     }
