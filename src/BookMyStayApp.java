@@ -55,11 +55,19 @@ class RoomInventory {
     }
 
     int getAvailability(String type) {
-        return inventory.get(type);
+        return inventory.getOrDefault(type, -1);
     }
 
-    void reduceAvailability(String type) {
-        inventory.put(type, inventory.get(type) - 1);
+    void reduceAvailability(String type) throws InvalidBookingException {
+        int available = getAvailability(type);
+        if (available <= 0) {
+            throw new InvalidBookingException("No availability for " + type);
+        }
+        inventory.put(type, available - 1);
+    }
+
+    boolean isValidRoom(String type) {
+        return inventory.containsKey(type);
     }
 }
 
@@ -85,14 +93,20 @@ class AddOnService {
     }
 }
 
+class InvalidBookingException extends Exception {
+    InvalidBookingException(String msg) {
+        super(msg);
+    }
+}
+
 public class BookMyStayApp {
 
     public static void main(String[] args) {
 
-        // UC8
+        // UC9
         System.out.println("======================================");
         System.out.println(" Welcome to Book My Stay Application ");
-        System.out.println(" Hotel Booking System v8.1 ");
+        System.out.println(" Hotel Booking System v9.1 ");
         System.out.println("======================================");
 
         RoomInventory inventory = new RoomInventory();
@@ -100,13 +114,8 @@ public class BookMyStayApp {
         Queue<Reservation> bookingQueue = new LinkedList<>();
         bookingQueue.add(new Reservation("Alice", "Single Room", "R1"));
         bookingQueue.add(new Reservation("Bob", "Double Room", "R2"));
+        bookingQueue.add(new Reservation("Eve", "Invalid Room", "R3"));
 
-        HashMap<String, Set<String>> allocatedRooms = new HashMap<>();
-        allocatedRooms.put("Single Room", new HashSet<>());
-        allocatedRooms.put("Double Room", new HashSet<>());
-        allocatedRooms.put("Suite Room", new HashSet<>());
-
-        HashMap<String, List<AddOnService>> serviceMap = new HashMap<>();
         List<Reservation> bookingHistory = new ArrayList<>();
 
         int roomCounter = 1;
@@ -114,30 +123,21 @@ public class BookMyStayApp {
         while (!bookingQueue.isEmpty()) {
             Reservation r = bookingQueue.poll();
 
-            if (inventory.getAvailability(r.roomType) > 0) {
-                String roomId = r.roomType.substring(0, 2).toUpperCase() + roomCounter++;
+            try {
+                if (!inventory.isValidRoom(r.roomType)) {
+                    throw new InvalidBookingException("Invalid room type: " + r.roomType);
+                }
 
-                allocatedRooms.get(r.roomType).add(roomId);
                 inventory.reduceAvailability(r.roomType);
+
+                String roomId = r.roomType.substring(0, 2).toUpperCase() + roomCounter++;
 
                 System.out.println(r.guestName + " booked " + r.roomType + " | Room ID: " + roomId);
 
-                List<AddOnService> services = new ArrayList<>();
-                services.add(new AddOnService("Breakfast", 500));
-                services.add(new AddOnService("WiFi", 200));
-
-                serviceMap.put(r.reservationId, services);
-
-                double total = 0;
-                for (AddOnService s : services) {
-                    total += s.cost;
-                }
-
-                System.out.println("Add-ons for " + r.reservationId + ": " + total);
-
                 bookingHistory.add(r);
-            } else {
-                System.out.println(r.guestName + " booking failed for " + r.roomType);
+
+            } catch (InvalidBookingException e) {
+                System.out.println("Booking failed for " + r.guestName + ": " + e.getMessage());
             }
         }
 
