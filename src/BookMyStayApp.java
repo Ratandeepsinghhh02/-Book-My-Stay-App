@@ -60,10 +60,12 @@ class RoomInventory {
 
     void reduceAvailability(String type) throws InvalidBookingException {
         int available = getAvailability(type);
-        if (available <= 0) {
-            throw new InvalidBookingException("No availability for " + type);
-        }
+        if (available <= 0) throw new InvalidBookingException("No availability for " + type);
         inventory.put(type, available - 1);
+    }
+
+    void increaseAvailability(String type) {
+        inventory.put(type, inventory.get(type) + 1);
     }
 
     boolean isValidRoom(String type) {
@@ -75,21 +77,12 @@ class Reservation {
     String guestName;
     String roomType;
     String reservationId;
+    String roomId;
 
     Reservation(String guestName, String roomType, String reservationId) {
         this.guestName = guestName;
         this.roomType = roomType;
         this.reservationId = reservationId;
-    }
-}
-
-class AddOnService {
-    String name;
-    double cost;
-
-    AddOnService(String name, double cost) {
-        this.name = name;
-        this.cost = cost;
     }
 }
 
@@ -103,10 +96,10 @@ public class BookMyStayApp {
 
     public static void main(String[] args) {
 
-        // UC9
+        // UC10
         System.out.println("======================================");
         System.out.println(" Welcome to Book My Stay Application ");
-        System.out.println(" Hotel Booking System v9.1 ");
+        System.out.println(" Hotel Booking System v10.1 ");
         System.out.println("======================================");
 
         RoomInventory inventory = new RoomInventory();
@@ -114,9 +107,9 @@ public class BookMyStayApp {
         Queue<Reservation> bookingQueue = new LinkedList<>();
         bookingQueue.add(new Reservation("Alice", "Single Room", "R1"));
         bookingQueue.add(new Reservation("Bob", "Double Room", "R2"));
-        bookingQueue.add(new Reservation("Eve", "Invalid Room", "R3"));
 
-        List<Reservation> bookingHistory = new ArrayList<>();
+        Map<String, Reservation> confirmedBookings = new HashMap<>();
+        Stack<String> rollbackStack = new Stack<>();
 
         int roomCounter = 1;
 
@@ -131,19 +124,30 @@ public class BookMyStayApp {
                 inventory.reduceAvailability(r.roomType);
 
                 String roomId = r.roomType.substring(0, 2).toUpperCase() + roomCounter++;
+                r.roomId = roomId;
+
+                confirmedBookings.put(r.reservationId, r);
 
                 System.out.println(r.guestName + " booked " + r.roomType + " | Room ID: " + roomId);
-
-                bookingHistory.add(r);
 
             } catch (InvalidBookingException e) {
                 System.out.println("Booking failed for " + r.guestName + ": " + e.getMessage());
             }
         }
 
-        System.out.println("----- Booking History -----");
-        for (Reservation r : bookingHistory) {
-            System.out.println(r.reservationId + " | " + r.guestName + " | " + r.roomType);
+        System.out.println("----- Cancellation -----");
+
+        String cancelId = "R1";
+
+        if (confirmedBookings.containsKey(cancelId)) {
+            Reservation r = confirmedBookings.remove(cancelId);
+
+            rollbackStack.push(r.roomId);
+            inventory.increaseAvailability(r.roomType);
+
+            System.out.println("Cancelled " + r.guestName + " | Room ID released: " + rollbackStack.peek());
+        } else {
+            System.out.println("Invalid cancellation request for " + cancelId);
         }
 
         System.out.println("Application terminated.");
